@@ -1,11 +1,12 @@
 name: allure_server_cli
+resolution: workspace
 description: CLI tool for communication with [Allure Server](https://github.com/kochetkov-ma/allure-server)
 version: 1.1.0
 repository: https://github.com/rIIh/dart_test_reporter
 issue_tracker: https://github.com/rIIh/dart_test_reporter/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+%5Ballure_server_cli%5D
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.5.0
   
 dependencies:
   args: ^2.5.0
@@ -14,7 +15,7 @@ dependencies:
   logger: ^2.3.0
 
 dev_dependencies:
-  lints: ^3.0.0
+  lints: ^6.0.0
   test: ^1.24.0
 
 executables:

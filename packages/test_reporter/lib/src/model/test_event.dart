@@ -209,7 +209,7 @@ enum TestResult {
 /// Its path is either absolute or relative to the root of the current package.
 /// {@endtemplate}
 @freezed
-class TestSuite with _$TestSuite {
+abstract class TestSuite with _$TestSuite {
   /// {@macro test_suite}
   const factory TestSuite({
     /// An opaque ID for the group.
@@ -234,7 +234,7 @@ class TestSuite with _$TestSuite {
 /// without including its full representation.
 /// {@endtemplate}
 @freezed
-class TestGroup with _$TestGroup {
+abstract class TestGroup with _$TestGroup {
   /// {@macro test_group}
   const factory TestGroup({
     /// An opaque ID for the group.
@@ -274,7 +274,7 @@ class TestGroup with _$TestGroup {
 /// Test metadata regarding whether the test was skipped and the reason.
 /// {@endtemplate}
 @freezed
-class TestMetadata with _$TestMetadata {
+abstract class TestMetadata with _$TestMetadata {
   /// {@macro test_metadata}
   const factory TestMetadata({
     /// Whether the test was skipped.
@@ -295,7 +295,7 @@ class TestMetadata with _$TestMetadata {
 /// without including its full representation.
 /// {@endtemplate}
 @freezed
-class Test with _$Test {
+abstract class Test with _$Test {
   /// {@macro test}
   const factory Test({
     /// An opaque ID for the test.

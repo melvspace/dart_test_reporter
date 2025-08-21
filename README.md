@@ -168,6 +168,18 @@ This installs all package dependencies and links local packages.
   melos run test --scope=allure_report
   ```
 
+* Preview Allure report after running tests
+
+  ```bash
+  melos preview
+  ```
+
+  or 
+
+  ```bash
+  npx allure-commandline serve allure-results
+  ```
+
 
 ## Disclaimer
 

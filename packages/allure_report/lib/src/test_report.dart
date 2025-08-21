@@ -5,7 +5,7 @@ part 'test_report.freezed.dart';
 
 /// Temporary test reporter instance for single test to accumulate metadata.
 @freezed
-class TestReport with _$TestReport {
+abstract class TestReport with _$TestReport {
   const TestReport._();
 
   const factory TestReport({

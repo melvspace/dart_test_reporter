@@ -6,9 +6,9 @@ part of 'test_event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$TestStartRunnerEventImpl _$$TestStartRunnerEventImplFromJson(
+TestStartRunnerEvent _$TestStartRunnerEventFromJson(
         Map<String, dynamic> json) =>
-    _$TestStartRunnerEventImpl(
+    TestStartRunnerEvent(
       protocolVersion: json['protocolVersion'] as String,
       runnerVersion: json['runnerVersion'] as String?,
       pid: (json['pid'] as num).toInt(),
@@ -16,8 +16,8 @@ _$TestStartRunnerEventImpl _$$TestStartRunnerEventImplFromJson(
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestStartRunnerEventImplToJson(
-        _$TestStartRunnerEventImpl instance) =>
+Map<String, dynamic> _$TestStartRunnerEventToJson(
+        TestStartRunnerEvent instance) =>
     <String, dynamic>{
       'protocolVersion': instance.protocolVersion,
       'runnerVersion': instance.runnerVersion,
@@ -26,39 +26,36 @@ Map<String, dynamic> _$$TestStartRunnerEventImplToJson(
       'type': instance.$type,
     };
 
-_$TestAllSuitesEventImpl _$$TestAllSuitesEventImplFromJson(
-        Map<String, dynamic> json) =>
-    _$TestAllSuitesEventImpl(
+TestAllSuitesEvent _$TestAllSuitesEventFromJson(Map<String, dynamic> json) =>
+    TestAllSuitesEvent(
       count: (json['count'] as num).toInt(),
       time: (json['time'] as num).toInt(),
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestAllSuitesEventImplToJson(
-        _$TestAllSuitesEventImpl instance) =>
+Map<String, dynamic> _$TestAllSuitesEventToJson(TestAllSuitesEvent instance) =>
     <String, dynamic>{
       'count': instance.count,
       'time': instance.time,
       'type': instance.$type,
     };
 
-_$TestSuiteEventImpl _$$TestSuiteEventImplFromJson(Map<String, dynamic> json) =>
-    _$TestSuiteEventImpl(
+TestSuiteEvent _$TestSuiteEventFromJson(Map<String, dynamic> json) =>
+    TestSuiteEvent(
       suite: TestSuite.fromJson(json['suite'] as Map<String, dynamic>),
       time: (json['time'] as num).toInt(),
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestSuiteEventImplToJson(
-        _$TestSuiteEventImpl instance) =>
+Map<String, dynamic> _$TestSuiteEventToJson(TestSuiteEvent instance) =>
     <String, dynamic>{
       'suite': instance.suite,
       'time': instance.time,
       'type': instance.$type,
     };
 
-_$TestDebugEventImpl _$$TestDebugEventImplFromJson(Map<String, dynamic> json) =>
-    _$TestDebugEventImpl(
+TestDebugEvent _$TestDebugEventFromJson(Map<String, dynamic> json) =>
+    TestDebugEvent(
       suiteID: (json['suiteID'] as num).toInt(),
       observatory: json['observatory'] as String?,
       remoteDebugger: json['remoteDebugger'] as String?,
@@ -66,8 +63,7 @@ _$TestDebugEventImpl _$$TestDebugEventImplFromJson(Map<String, dynamic> json) =>
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestDebugEventImplToJson(
-        _$TestDebugEventImpl instance) =>
+Map<String, dynamic> _$TestDebugEventToJson(TestDebugEvent instance) =>
     <String, dynamic>{
       'suiteID': instance.suiteID,
       'observatory': instance.observatory,
@@ -76,39 +72,36 @@ Map<String, dynamic> _$$TestDebugEventImplToJson(
       'type': instance.$type,
     };
 
-_$TestGroupEventImpl _$$TestGroupEventImplFromJson(Map<String, dynamic> json) =>
-    _$TestGroupEventImpl(
+TestGroupEvent _$TestGroupEventFromJson(Map<String, dynamic> json) =>
+    TestGroupEvent(
       group: TestGroup.fromJson(json['group'] as Map<String, dynamic>),
       time: (json['time'] as num).toInt(),
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestGroupEventImplToJson(
-        _$TestGroupEventImpl instance) =>
+Map<String, dynamic> _$TestGroupEventToJson(TestGroupEvent instance) =>
     <String, dynamic>{
       'group': instance.group,
       'time': instance.time,
       'type': instance.$type,
     };
 
-_$TestStartEventImpl _$$TestStartEventImplFromJson(Map<String, dynamic> json) =>
-    _$TestStartEventImpl(
+TestStartEvent _$TestStartEventFromJson(Map<String, dynamic> json) =>
+    TestStartEvent(
       test: Test.fromJson(json['test'] as Map<String, dynamic>),
       time: (json['time'] as num).toInt(),
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestStartEventImplToJson(
-        _$TestStartEventImpl instance) =>
+Map<String, dynamic> _$TestStartEventToJson(TestStartEvent instance) =>
     <String, dynamic>{
       'test': instance.test,
       'time': instance.time,
       'type': instance.$type,
     };
 
-_$TestMessageEventImpl _$$TestMessageEventImplFromJson(
-        Map<String, dynamic> json) =>
-    _$TestMessageEventImpl(
+TestMessageEvent _$TestMessageEventFromJson(Map<String, dynamic> json) =>
+    TestMessageEvent(
       testID: (json['testID'] as num).toInt(),
       messageType: json['messageType'] as String,
       message: json['message'] as String,
@@ -116,8 +109,7 @@ _$TestMessageEventImpl _$$TestMessageEventImplFromJson(
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestMessageEventImplToJson(
-        _$TestMessageEventImpl instance) =>
+Map<String, dynamic> _$TestMessageEventToJson(TestMessageEvent instance) =>
     <String, dynamic>{
       'testID': instance.testID,
       'messageType': instance.messageType,
@@ -126,8 +118,8 @@ Map<String, dynamic> _$$TestMessageEventImplToJson(
       'type': instance.$type,
     };
 
-_$TestErrorEventImpl _$$TestErrorEventImplFromJson(Map<String, dynamic> json) =>
-    _$TestErrorEventImpl(
+TestErrorEvent _$TestErrorEventFromJson(Map<String, dynamic> json) =>
+    TestErrorEvent(
       testID: (json['testID'] as num).toInt(),
       error: json['error'] as String,
       stackTrace: json['stackTrace'] as String,
@@ -136,8 +128,7 @@ _$TestErrorEventImpl _$$TestErrorEventImplFromJson(Map<String, dynamic> json) =>
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestErrorEventImplToJson(
-        _$TestErrorEventImpl instance) =>
+Map<String, dynamic> _$TestErrorEventToJson(TestErrorEvent instance) =>
     <String, dynamic>{
       'testID': instance.testID,
       'error': instance.error,
@@ -147,8 +138,8 @@ Map<String, dynamic> _$$TestErrorEventImplToJson(
       'type': instance.$type,
     };
 
-_$TestDoneEventImpl _$$TestDoneEventImplFromJson(Map<String, dynamic> json) =>
-    _$TestDoneEventImpl(
+TestDoneEvent _$TestDoneEventFromJson(Map<String, dynamic> json) =>
+    TestDoneEvent(
       testID: (json['testID'] as num).toInt(),
       result: $enumDecode(_$TestResultEnumMap, json['result']),
       hidden: json['hidden'] as bool,
@@ -157,7 +148,7 @@ _$TestDoneEventImpl _$$TestDoneEventImplFromJson(Map<String, dynamic> json) =>
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestDoneEventImplToJson(_$TestDoneEventImpl instance) =>
+Map<String, dynamic> _$TestDoneEventToJson(TestDoneEvent instance) =>
     <String, dynamic>{
       'testID': instance.testID,
       'result': _$TestResultEnumMap[instance.result]!,
@@ -173,52 +164,49 @@ const _$TestResultEnumMap = {
   TestResult.error: 'error',
 };
 
-_$TestRunnerDoneEventImpl _$$TestRunnerDoneEventImplFromJson(
-        Map<String, dynamic> json) =>
-    _$TestRunnerDoneEventImpl(
+TestRunnerDoneEvent _$TestRunnerDoneEventFromJson(Map<String, dynamic> json) =>
+    TestRunnerDoneEvent(
       success: json['success'] as bool?,
       time: (json['time'] as num).toInt(),
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestRunnerDoneEventImplToJson(
-        _$TestRunnerDoneEventImpl instance) =>
+Map<String, dynamic> _$TestRunnerDoneEventToJson(
+        TestRunnerDoneEvent instance) =>
     <String, dynamic>{
       'success': instance.success,
       'time': instance.time,
       'type': instance.$type,
     };
 
-_$TestExitEventImpl _$$TestExitEventImplFromJson(Map<String, dynamic> json) =>
-    _$TestExitEventImpl(
+TestExitEvent _$TestExitEventFromJson(Map<String, dynamic> json) =>
+    TestExitEvent(
       exitCode: (json['exitCode'] as num).toInt(),
       time: (json['time'] as num).toInt(),
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$TestExitEventImplToJson(_$TestExitEventImpl instance) =>
+Map<String, dynamic> _$TestExitEventToJson(TestExitEvent instance) =>
     <String, dynamic>{
       'exitCode': instance.exitCode,
       'time': instance.time,
       'type': instance.$type,
     };
 
-_$TestSuiteImpl _$$TestSuiteImplFromJson(Map<String, dynamic> json) =>
-    _$TestSuiteImpl(
+_TestSuite _$TestSuiteFromJson(Map<String, dynamic> json) => _TestSuite(
       id: (json['id'] as num).toInt(),
       platform: json['platform'] as String,
       path: json['path'] as String?,
     );
 
-Map<String, dynamic> _$$TestSuiteImplToJson(_$TestSuiteImpl instance) =>
+Map<String, dynamic> _$TestSuiteToJson(_TestSuite instance) =>
     <String, dynamic>{
       'id': instance.id,
       'platform': instance.platform,
       'path': instance.path,
     };
 
-_$TestGroupImpl _$$TestGroupImplFromJson(Map<String, dynamic> json) =>
-    _$TestGroupImpl(
+_TestGroup _$TestGroupFromJson(Map<String, dynamic> json) => _TestGroup(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
       suiteID: (json['suiteID'] as num).toInt(),
@@ -230,7 +218,7 @@ _$TestGroupImpl _$$TestGroupImplFromJson(Map<String, dynamic> json) =>
       metadata: TestMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$$TestGroupImplToJson(_$TestGroupImpl instance) =>
+Map<String, dynamic> _$TestGroupToJson(_TestGroup instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -243,19 +231,19 @@ Map<String, dynamic> _$$TestGroupImplToJson(_$TestGroupImpl instance) =>
       'metadata': instance.metadata,
     };
 
-_$TestMetadataImpl _$$TestMetadataImplFromJson(Map<String, dynamic> json) =>
-    _$TestMetadataImpl(
+_TestMetadata _$TestMetadataFromJson(Map<String, dynamic> json) =>
+    _TestMetadata(
       skip: json['skip'] as bool,
       skipReason: json['skipReason'] as String?,
     );
 
-Map<String, dynamic> _$$TestMetadataImplToJson(_$TestMetadataImpl instance) =>
+Map<String, dynamic> _$TestMetadataToJson(_TestMetadata instance) =>
     <String, dynamic>{
       'skip': instance.skip,
       'skipReason': instance.skipReason,
     };
 
-_$TestImpl _$$TestImplFromJson(Map<String, dynamic> json) => _$TestImpl(
+_Test _$TestFromJson(Map<String, dynamic> json) => _Test(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
       suiteID: (json['suiteID'] as num).toInt(),
@@ -271,8 +259,7 @@ _$TestImpl _$$TestImplFromJson(Map<String, dynamic> json) => _$TestImpl(
       metadata: TestMetadata.fromJson(json['metadata'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$$TestImplToJson(_$TestImpl instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$TestToJson(_Test instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'suiteID': instance.suiteID,

@@ -1,11 +1,12 @@
 name: alchemist_test_reporter
+resolution: workspace
 description: Alchemist Test Reporter Addon
 version: 1.2.0
 homepage: https://github.com/rIIh/dart_test_reporter
 issue_tracker: https://github.com/rIIh/dart_test_reporter/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+%5Balchemist_test_reporter%5D
 
 environment:
-  sdk: ^3.0.0
+  sdk: ^3.5.0
   flutter: ">=3.0.0"
 
 dependencies:
@@ -22,4 +23,4 @@ dependencies:
 
 
 dev_dependencies:
-  lints: ^3.0.0
+  lints: ^6.0.0

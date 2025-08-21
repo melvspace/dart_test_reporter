@@ -1,7 +1,60 @@
 name: test_reporter_workspace
 
+workspace:
+  - apps/plain_dart_package
+  - apps/sandbox
+  - packages/alchemist_test_reporter
+  - packages/allure_report
+  - packages/allure_server_cli
+  - packages/test_reporter
+
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.5.0 <4.0.0"
 
 dev_dependencies:
-  melos: ^6.0.0
+  melos: ^7.0.0
+
+melos:
+  scripts:
+    allures:install: |
+      melos exec --scope=allure_server_cli -- dart pub global activate -s path .
+
+    generate:
+      exec:
+        concurrency: 1
+        orderDependents: true
+      packageFilters:
+        dependsOn: build_runner
+      run: dart run build_runner build -d
+      description: Generate code for all packages
+
+    test: |
+      find . -type d -name "allure-results" -exec rm -rf {} \;
+      melos exec --dir-exists test --dir-exists allure-results -- rm -rf allure-results
+      melos exec --dir-exists test --dir-exists reports -- rm -rf reports
+      melos exec --dir-exists test --depends-on allure_report -- dart run test_reporter -- flutter test
+      echo "Collecting test results..."
+      mkdir allure-results || echo "folder 'allure-results' already exists, skipping creation..."
+      mkdir allure-results-tmp || echo "folder 'allure-results-tmp' already exists, skipping creation..."
+      find . -path "*/allure-results/*" -type f -exec cp '{}' ./allure-results-tmp/ \;
+      mv allure-results-tmp/* allure-results/
+      rm -rf allure-results-tmp
+
+    test:sandbox: |
+      find . -type d -name "allure-results" -exec rm -rf {} \;
+      melos exec --dir-exists test --dir-exists allure-results -- rm -rf allure-results
+      melos exec --dir-exists test --dir-exists reports -- rm -rf reports
+      melos exec --scope sandbox -- dart run test_reporter -- flutter test
+      echo "Collecting test results..."
+      mkdir allure-results || echo "folder 'allure-results' already exists, skipping creation..."
+      mkdir allure-results-tmp || echo "folder 'allure-results-tmp' already exists, skipping creation..."
+      find . -path "*/allure-results/*" -type f -exec cp '{}' ./allure-results-tmp/ \;
+      mv allure-results-tmp/* allure-results/
+      rm -rf allure-results-tmp
+
+
+    preview: |
+      npx allure-commandline serve allure-results/
+
+    goldens:accept: |
+      melos exec --dir-exists test -- flutter test --tags golden --update-goldens
