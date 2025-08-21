@@ -1,3 +1,7 @@
+## 1.3.0
+
+ - **FEAT**(deps): upgrade to recent sdk versions.
+
 ## 1.2.0
 
  - **FEAT**: add allure diff support.

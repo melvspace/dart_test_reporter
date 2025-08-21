@@ -1,7 +1,7 @@
 name: alchemist_test_reporter
 resolution: workspace
 description: Alchemist Test Reporter Addon
-version: 1.2.0
+version: 1.3.0
 homepage: https://github.com/rIIh/dart_test_reporter
 issue_tracker: https://github.com/rIIh/dart_test_reporter/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+%5Balchemist_test_reporter%5D
 

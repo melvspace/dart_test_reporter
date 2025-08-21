@@ -1,3 +1,7 @@
+## 1.4.0
+
+ - **FEAT**(deps): upgrade to recent sdk versions.
+
 ## 1.3.0
 
  - **REFACTOR**: remove redundant comments.

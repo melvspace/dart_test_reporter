@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2025-08-21
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`alchemist_test_reporter` - `v1.3.0`](#alchemist_test_reporter---v130)
+ - [`allure_report` - `v1.4.0`](#allure_report---v140)
+ - [`allure_server_cli` - `v1.2.0`](#allure_server_cli---v120)
+ - [`test_reporter` - `v1.3.0`](#test_reporter---v130)
+
+---
+
+#### `alchemist_test_reporter` - `v1.3.0`
+
+ - **FEAT**(deps): upgrade to recent sdk versions.
+
+#### `allure_report` - `v1.4.0`
+
+ - **FEAT**(deps): upgrade to recent sdk versions.
+
+#### `allure_server_cli` - `v1.2.0`
+
+ - **FEAT**(deps): upgrade to recent sdk versions.
+
+#### `test_reporter` - `v1.3.0`
+
+ - **FEAT**(deps): upgrade to recent sdk versions.
+
+
 ## 2025-05-25
 
 ### Changes

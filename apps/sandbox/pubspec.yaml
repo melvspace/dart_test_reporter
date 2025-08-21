@@ -20,9 +20,9 @@ dev_dependencies:
     sdk: flutter
 
   # reporter
-  allure_report: ^1.3.0
-  test_reporter: ^1.2.0
-  alchemist_test_reporter: ^1.2.0
+  allure_report: ^1.4.0
+  test_reporter: ^1.3.0
+  alchemist_test_reporter: ^1.3.0
   
   # other
   path: ^1.9.0
