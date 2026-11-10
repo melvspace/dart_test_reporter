@@ -1,79 +1,79 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Dart
+name: CI
 
 on:
   push:
-    branches: ["main"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      goldens:
+        description: Run golden tests against existing baselines
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test_report:
-    permissions:
-      contents: write
-
+  checks:
+    name: Format, analyze, and test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
 
-      # Note: This workflow uses the latest stable version of the Dart SDK.
-      # You can specify other versions if desired, see documentation here:
-      # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      # - uses: dart-lang/setup-dart@v1
-      - name: Setup Flutter SDK
-        uses: flutter-actions/setup-flutter@v3
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - name: Install dependencies
-        run: dart pub global activate melos
+      - name: Install workspace dependencies
+        run: flutter pub get
 
-      - name: Melos Bootstrap
-        run: melos bs
+      - name: Generate code
+        run: dart run melos run generate --no-select
 
-      - name: Install
-        run: |
-          melos allures:install
+      - name: Check formatting
+        run: >-
+          git ls-files -z '*.dart' ':!:*.g.dart' ':!:*.freezed.dart' |
+          xargs -0 dart format --output=none --set-exit-if-changed
 
-      - name: Generate
-        run: melos generate
+      - name: Analyze workspace
+        run: dart analyze --fatal-infos
 
-      # Consider passing '--fatal-infos' for slightly stricter analysis.
-      - name: Analyze project source
-        run: dart analyze
+      # These apps demonstrate failed and flaky reports as well as passing tests.
+      # Keep the intentional failures out of the required regression checks.
+      - name: Test Dart example
+        working-directory: apps/plain_dart_package
+        run: dart test --reporter=expanded --name='^(?!.*Failing Test).*$'
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
-      - name: Run tests
-        continue-on-error: true
-        run: melos test
+      - name: Test Flutter sandbox
+        working-directory: apps/sandbox
+        run: >-
+          flutter test --dart-define=CI=true --coverage --reporter=expanded
+          --exclude-tags=golden
+          --name='^(?!.*(?:Known:|Flaky|Muted: int.parse fails)).*$'
 
-      - name: Aggregate results
-        run: |
-          rm -rf allure-results
-          mkdir allure-results-tmp
-          find . -path "*/allure-results/*" -type f -exec cp '{}' ./allure-results-tmp/ \;
-          mv allure-results-tmp allure-results
-          zip -r allure-results.zip allure-results/
+      # Existing golden baselines need reconciliation with current Flutter.
+      - name: Test CI goldens
+        if: ${{ inputs.goldens == true }}
+        working-directory: apps/sandbox
+        run: flutter test --dart-define=CI=true --tags=golden --reporter=expanded
 
-      - name: Test marketplace action
-        uses: simple-elf/allure-report-action@master
+      - name: Upload test artifacts
         if: always()
-        id: allure-report
+        uses: actions/upload-artifact@v4
         with:
-          gh_pages: gh-pages
-          allure_results: allure-results
-          allure_report: allure-report
-          allure_history: allure-history
-
-      - name: Deploy report to Github Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v2
-        env:
-          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: allure-history
+          name: test-artifacts
+          if-no-files-found: ignore
+          retention-days: 14
+          path: |
+            apps/sandbox/coverage/
+            **/test/**/failures/
+            **/allure-results/
+            **/reports/

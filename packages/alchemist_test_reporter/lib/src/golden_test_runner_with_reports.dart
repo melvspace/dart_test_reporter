@@ -50,7 +50,7 @@ class GoldenTestRunnerWithReports extends GoldenTestRunner {
         widget: widget,
         globalConfigTheme: globalConfigTheme,
         variantConfigTheme: variantConfigTheme,
-        goldenTestTheme: goldenTestTheme, 
+        goldenTestTheme: goldenTestTheme,
         forceUpdate: forceUpdate,
         obscureText: obscureText,
         renderShadows: renderShadows,

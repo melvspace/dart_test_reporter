@@ -4,6 +4,14 @@ analyzer:
   errors:
     always_declare_return_types: warning
     asset_directory_does_not_exist: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
