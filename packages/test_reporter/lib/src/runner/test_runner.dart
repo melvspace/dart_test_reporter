@@ -79,6 +79,7 @@ Stream<TestEvent> _runTestProcess(
   Future<Process> Function() processRunner,
 ) {
   final controller = StreamController<TestEvent>();
+  final stdoutDone = Completer<void>();
   late StreamSubscription<dynamic> testEventSubscription;
   late StreamSubscription<dynamic> errorSubscription;
   late Future<Process> processFuture;
@@ -93,15 +94,19 @@ Stream<TestEvent> _runTestProcess(
     testEventSubscription = testEvents.listen(
       controller.add,
       onError: controller.addError,
+      onDone: stdoutDone.complete,
     );
 
     final exitCode = await process.exitCode;
+    await stdoutDone.future;
     stopwatch.stop();
     await Future.wait([
       errorSubscription.cancel(),
       testEventSubscription.cancel(),
     ]);
+
     if (controller.isClosed) return;
+
     controller.add(
       TestExitEvent(
         time: stopwatch.elapsedMilliseconds,
@@ -116,6 +121,8 @@ Stream<TestEvent> _runTestProcess(
     (await processFuture).kill();
     await errorSubscription.cancel();
     await testEventSubscription.cancel();
+
+    if (!stdoutDone.isCompleted) stdoutDone.complete();
   }
 
   controller
@@ -134,17 +141,11 @@ extension on Stream<List<int>> {
   ///
   /// Returns a stream of parsed [TestEvent] instances.
   Stream<TestEvent> mapToTestEvents() {
-    return map(utf8.decode)
-        .expand<String>(_splitLines)
+    return transform(utf8.decoder)
+        .transform(const LineSplitter())
         .map<Map<String, Object?>>(_tryDecode)
         .where((value) => value.isNotEmpty)
         .map(TestEvent.fromJson);
-  }
-
-  Iterable<String> _splitLines(String content) sync* {
-    for (final line in content.split('\n')) {
-      yield line.trim();
-    }
   }
 
   Map<String, Object?> _tryDecode(String value) {
