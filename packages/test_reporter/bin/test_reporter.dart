@@ -37,9 +37,14 @@ Future<void> main(List<String> args) async {
 
   final (_, reporterPort) = await createReporter(reporter, args);
 
+  var receivedExit = false;
+
   events.listen(
     (event) async {
+      if (event is TestExitEvent) receivedExit = true;
+
       reporterPort.send(jsonEncode(event.toJson()));
+
       if (event is TestExitEvent) {
         // TODO(@melvspace): 06/13/24 exit when isolate done its work
         await Future.delayed(Duration(seconds: 2));
@@ -49,6 +54,9 @@ Future<void> main(List<String> args) async {
     onError: (err) {
       AnsiPen pen = AnsiPen()..red(bold: false);
       print(pen(err));
+    },
+    onDone: () {
+      if (!receivedExit) exit(1);
     },
   );
 }

@@ -12,8 +12,11 @@ void main() {
     final events = <TestEvent>[];
     final errors = <Object>[];
     final done = Completer<void>();
-    dartTest(startProcess: starter(() async => process))
-        .listen(events.add, onError: errors.add, onDone: done.complete);
+    dartTest(startProcess: starter(() async => process)).listen(
+      events.add,
+      onError: errors.add,
+      onDone: done.complete,
+    );
     await pump();
     process.exit.complete(7);
     await pump();
@@ -78,6 +81,32 @@ void main() {
         dartTest(startProcess: starter(start)),
         emitsInOrder([emitsError(same(failure)), emitsDone]),
       );
+    }
+  });
+
+  test('CLI exits nonzero when the child executable cannot start', () async {
+    final tempRoot = Directory('/tmp/codex')..createSync(recursive: true);
+    final temp = tempRoot.createTempSync('runner-start-failure-');
+    final process = await Process.start(
+      Platform.resolvedExecutable,
+      ['bin/test_reporter.dart', 'dart', 'test'],
+      environment: {'PATH': temp.path, 'TMPDIR': temp.path},
+    );
+    final output = process.stdout.transform(utf8.decoder).join();
+    final errors = process.stderr.transform(utf8.decoder).join();
+
+    try {
+      final code = await process.exitCode.timeout(const Duration(seconds: 15));
+      final diagnostics = '${await output}${await errors}';
+
+      expect(code, isNot(0));
+      expect(diagnostics, contains('ProcessException'));
+    } finally {
+      process.kill();
+      await process.exitCode;
+      await output;
+      await errors;
+      temp.deleteSync(recursive: true);
     }
   });
 
