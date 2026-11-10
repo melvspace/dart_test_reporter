@@ -75,47 +75,74 @@ Stream<TestEvent> flutterTest({
   );
 }
 
-Stream<TestEvent> _runTestProcess(
-  Future<Process> Function() processRunner,
-) {
+Stream<TestEvent> _runTestProcess(Future<Process> Function() processRunner) {
   final controller = StreamController<TestEvent>();
-  late StreamSubscription<dynamic> testEventSubscription;
-  late StreamSubscription<dynamic> errorSubscription;
-  late Future<Process> processFuture;
+  StreamSubscription<dynamic>? testEventSubscription;
+  StreamSubscription<dynamic>? errorSubscription;
+  Process? process;
+  var cancelled = false;
+  var finished = false;
+  final stdoutDone = Completer<void>();
+  final stderrDone = Completer<void>();
+
+  void completeOutput(Completer<void> done) {
+    if (!done.isCompleted) done.complete();
+  }
 
   Future<void> onListen() async {
     final stopwatch = Stopwatch()..start();
-    processFuture = processRunner();
-    final process = await processFuture;
-    final errors = process.stderr.map((e) => utf8.decode(e).trim());
-    final testEvents = process.stdout.mapToTestEvents();
-    errorSubscription = errors.listen(controller.addError);
-    testEventSubscription = testEvents.listen(
-      controller.add,
-      onError: controller.addError,
-    );
 
-    final exitCode = await process.exitCode;
-    stopwatch.stop();
-    await Future.wait([
-      errorSubscription.cancel(),
-      testEventSubscription.cancel(),
-    ]);
-    if (controller.isClosed) return;
-    controller.add(
-      TestExitEvent(
-        time: stopwatch.elapsedMilliseconds,
-        exitCode: exitCode,
-      ),
-    );
-    await controller.close();
+    try {
+      final startedProcess = await processRunner();
+      process = startedProcess;
+
+      if (cancelled) {
+        startedProcess.kill();
+
+        return;
+      }
+
+      final errors = startedProcess.stderr.map((e) => utf8.decode(e).trim());
+      final testEvents = startedProcess.stdout.mapToTestEvents();
+      errorSubscription = errors.listen(
+        controller.addError,
+        onDone: () => completeOutput(stderrDone),
+      );
+      testEventSubscription = testEvents.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: () => completeOutput(stdoutDone),
+      );
+
+      final exitCode = await startedProcess.exitCode;
+      await Future.wait([stdoutDone.future, stderrDone.future]);
+      stopwatch.stop();
+
+      if (cancelled) return;
+
+      controller.add(
+        TestExitEvent(time: stopwatch.elapsedMilliseconds, exitCode: exitCode),
+      );
+    } catch (error, stackTrace) {
+      if (!cancelled) controller.addError(error, stackTrace);
+    } finally {
+      finished = true;
+
+      if (!cancelled) await controller.close();
+    }
   }
 
   Future<void> onCancel() async {
-    await controller.close();
-    (await processFuture).kill();
-    await errorSubscription.cancel();
-    await testEventSubscription.cancel();
+    if (finished) return;
+
+    cancelled = true;
+    process?.kill();
+    await Future.wait([
+      if (errorSubscription != null) errorSubscription!.cancel(),
+      if (testEventSubscription != null) testEventSubscription!.cancel(),
+    ]);
+    completeOutput(stdoutDone);
+    completeOutput(stderrDone);
   }
 
   controller
