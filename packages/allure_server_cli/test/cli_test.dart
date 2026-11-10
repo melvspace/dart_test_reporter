@@ -14,8 +14,8 @@ void main() {
 
   setUp(() async {
     temporary = await Directory.systemTemp.createTemp('allures-test-');
-    archive = await File('${temporary.path}/results.zip')
-        .writeAsBytes([1, 2, 3]);
+    archive =
+        await File('${temporary.path}/results.zip').writeAsBytes([1, 2, 3]);
     requests = [];
     reports = [];
     uploadStatus = 200;
@@ -55,13 +55,17 @@ void main() {
   });
 
   Future<ProcessResult> runCli(List<String> arguments) {
-    return Process.run(Platform.resolvedExecutable, [
-      'run',
-      'bin/allures.dart',
-      '--host',
-      'http://127.0.0.1:${server.port}',
-      ...arguments,
-    ], workingDirectory: Directory.current.path);
+    return Process.run(
+      Platform.resolvedExecutable,
+      [
+        'run',
+        'bin/allures.dart',
+        '--host',
+        'http://127.0.0.1:${server.port}',
+        ...arguments,
+      ],
+      workingDirectory: Directory.current.path,
+    );
   }
 
   test('upload HTTP failures exit nonzero', () async {
