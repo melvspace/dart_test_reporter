@@ -33,12 +33,14 @@ Future<void> main(List<String> arguments) async {
 
     if (results.wasParsed('version')) {
       l.i('allures version: $version');
+
       return;
     }
 
     // Process the parsed arguments.
     if (arguments.isEmpty || results.wasParsed('help')) {
       printUsage(argParser);
+
       return;
     }
 
@@ -91,15 +93,23 @@ Future<void> main(List<String> arguments) async {
 
     l.d('Dio Client created with host base: ${dio.options.baseUrl}');
 
+    if (results.command == null) {
+      throw FormatException('A command is required');
+    }
+
     if (results.command case ArgResults command) {
       switch (command.name) {
         case 'report':
+          if (command.rest.isNotEmpty) {
+            throw FormatException('Unexpected report arguments');
+          }
+
           l.i(
             'Sending report to Allure Server: '
             '${redactHeaderArguments(command.arguments)}',
           );
 
-          await ReportCommand(
+          final result = await ReportCommand(
             params: Params(
               path: command.multiOption('path'),
               executor: Executor.fromArgs(command),
@@ -109,17 +119,30 @@ Future<void> main(List<String> arguments) async {
             ),
           ).execute(dio);
 
+          if (result == null) {
+            exitCode = 1;
+          }
+
         case 'upload':
+          if (command.rest.length != 1) {
+            throw FormatException('upload requires exactly one archive path');
+          }
+
           final file = command.rest.single;
           l.i(
             'Sending report archive to Allure Server: '
             '${redactHeaderArguments(command.arguments)}',
           );
 
-          await UploadCommand(file: file).execute(dio);
+          final result = await UploadCommand(file: file).execute(dio);
+
+          if (result == null) {
+            exitCode = 1;
+          }
       }
     }
   } on FormatException catch (e, trace) {
+    exitCode = 2;
     l.e(e.message, stackTrace: trace);
     print('');
     printUsage(argParser);

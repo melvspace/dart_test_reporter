@@ -56,7 +56,7 @@ void main() {
       );
       final output = '${result.stdout}\n${result.stderr}';
 
-      expect(result.exitCode, 0);
+      expect(result.exitCode, 2);
       expect(output, contains('[REDACTED]'));
       expect(output, isNot(contains(user)));
       expect(output, isNot(contains(password)));
