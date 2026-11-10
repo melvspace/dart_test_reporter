@@ -44,17 +44,18 @@ Future<void> main(List<String> arguments) async {
 
     // Act on the arguments provided.
     l.i('Positional arguments: ${results.rest}');
-    l.d('All arguments: ${results.arguments}');
+    l.d('All arguments: ${redactHeaderArguments(results.arguments)}');
 
     if (!results.wasParsed('host')) {
       throw FormatException('host was not provided');
     }
 
     var headers = results.multiOption('header').map((e) {
-      final match = RegExp('([a-zA-Z]+)="?(.+)"?').firstMatch(e);
+      final match = RegExp(r'^([^=\s]+)=(.+)$').firstMatch(e);
+
       if (match == null) {
         throw FormatException(
-          'Invalid Header format - $e. '
+          'Invalid Header format. '
           'Expected Header in format `KEY=VALUE`',
         );
       }
@@ -65,10 +66,11 @@ Future<void> main(List<String> arguments) async {
       return MapEntry(header, value);
     });
 
-    l.d('Headers: $headers');
+    l.d('Headers: ${headers.map((header) => '${header.key}=[REDACTED]')}');
 
     var host = results.option('host')!;
     var api = results.option('api')!;
+
     if (!host.startsWith(RegExp(r'https?://'))) {
       host = 'https://$host';
     }
@@ -92,7 +94,10 @@ Future<void> main(List<String> arguments) async {
     if (results.command case ArgResults command) {
       switch (command.name) {
         case 'report':
-          l.i('Sending report to Allure Server: ${command.arguments}');
+          l.i(
+            'Sending report to Allure Server: '
+            '${redactHeaderArguments(command.arguments)}',
+          );
 
           await ReportCommand(
             params: Params(
@@ -106,7 +111,10 @@ Future<void> main(List<String> arguments) async {
 
         case 'upload':
           final file = command.rest.single;
-          l.i('Sending report archive to Allure Server: ${command.arguments}');
+          l.i(
+            'Sending report archive to Allure Server: '
+            '${redactHeaderArguments(command.arguments)}',
+          );
 
           await UploadCommand(file: file).execute(dio);
       }
@@ -124,8 +132,6 @@ MapEntry<String, String>? getAuthorizationFromEnvironment() {
     final user = Platform.environment['ALLURES_BASIC_AUTH_USER'];
     final password = Platform.environment['ALLURES_BASIC_AUTH_PASSWORD'];
 
-    l.d([user, password]);
-
     return MapEntry(
       "Authorization",
       "Basic ${base64.encode(utf8.encode('$user:$password'))}",
@@ -133,4 +139,28 @@ MapEntry<String, String>? getAuthorizationFromEnvironment() {
   }
 
   return null;
+}
+
+List<String> redactHeaderArguments(List<String> arguments) {
+  var headerValueExpected = false;
+
+  return arguments.map((argument) {
+    if (headerValueExpected) {
+      headerValueExpected = false;
+
+      return '[REDACTED]';
+    }
+
+    if (argument == '--header') {
+      headerValueExpected = true;
+
+      return argument;
+    }
+
+    if (argument.startsWith('--header=')) {
+      return '--header=[REDACTED]';
+    }
+
+    return argument;
+  }).toList();
 }
