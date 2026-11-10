@@ -145,10 +145,12 @@ class AllureReporter implements TestReporter {
           end: event.copyWith(result: status),
         );
 
-        onReportCreated(tests[event.testID]!);
+        await onReportCreated(tests[event.testID]!);
 
-      case TestExitEvent event:
-        exit(event.exitCode);
+      case TestExitEvent():
+        if (!_completer.isCompleted) {
+          _completer.complete();
+        }
 
       default:
         print(event);
@@ -299,7 +301,7 @@ class AllureReporter implements TestReporter {
     };
 
     // TODO(@melvspace): 06/12/24 define output with args
-    File('allure-results/${json['id']}-result.json')
+    await File('allure-results/${json['id']}-result.json')
         .writeAsString(JsonEncoder.withIndent('  ').convert(json));
   }
 
