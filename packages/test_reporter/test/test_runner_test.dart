@@ -7,6 +7,18 @@ import 'package:test_reporter/src/runner/test_runner.dart';
 import 'package:universal_io/io.dart';
 
 void main() {
+  test('waits for stdout after exitCode and flushes the final line', () async {
+    final events = await _readEvents(
+      [
+        utf8.encode('${_messageJson('first')}\n'),
+        utf8.encode(_messageJson('last')),
+      ],
+      exitBeforeStdout: true,
+    );
+
+    expect(events, [_message('first'), _message('last')]);
+  });
+
   test('decodes JSON split at every byte boundary', () async {
     final bytes = utf8.encode('${_messageJson('hello')}\n');
 
@@ -62,8 +74,11 @@ String _messageJson(String message) => jsonEncode({
       'time': 0,
     });
 
-Future<List<TestEvent>> _readEvents(List<List<int>> chunks) async {
-  final process = _ChunkedProcess(chunks);
+Future<List<TestEvent>> _readEvents(
+  List<List<int>> chunks, {
+  bool exitBeforeStdout = false,
+}) async {
+  final process = _ChunkedProcess(chunks, exitBeforeStdout: exitBeforeStdout);
   final events = <TestEvent>[];
   final result = Completer<List<TestEvent>>();
 
@@ -99,17 +114,25 @@ Future<List<TestEvent>> _readEvents(List<List<int>> chunks) async {
 }
 
 class _ChunkedProcess implements Process {
-  _ChunkedProcess(this.chunks);
+  _ChunkedProcess(this.chunks, {this.exitBeforeStdout = false});
 
   final List<List<int>> chunks;
+  final bool exitBeforeStdout;
   final _exitCode = Completer<int>();
 
   @override
   Stream<List<int>> get stdout async* {
+    if (exitBeforeStdout) {
+      _exitCode.complete(0);
+      await Future<void>.delayed(Duration.zero);
+    }
+
     yield* Stream.fromIterable(chunks);
 
     // Let stdout close and flush the decoder before reporting process exit.
-    Timer.run(() => _exitCode.complete(0));
+    if (!exitBeforeStdout) {
+      Timer.run(() => _exitCode.complete(0));
+    }
   }
 
   @override
