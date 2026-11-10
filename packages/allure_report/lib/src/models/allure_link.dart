@@ -7,8 +7,13 @@ class AllureLink {
   AllureLink({required this.type, required this.name, required this.link});
 
   factory AllureLink.fromEvent(String event) {
-    final [_, type, name, link] = event.split(':');
-    return AllureLink(type: type, name: name, link: link);
+    final [_, type, name, url, ...remainder] = event.split(':');
+
+    return AllureLink(
+      type: type,
+      name: name,
+      link: [url, ...remainder].join(':'),
+    );
   }
 
   @override
