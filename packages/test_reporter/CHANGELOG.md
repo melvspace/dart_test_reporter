@@ -1,3 +1,7 @@
+## 1.3.2
+
+- Restore the missing 1.3.1 release notes in the published package.
+
 ## 1.3.1
 
 - Wait for asynchronous reporters to finish before exiting, and preserve the test runner's exit code.
