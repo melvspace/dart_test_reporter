@@ -1,3 +1,8 @@
+## 1.3.1
+
+- Wait for asynchronous reporters to finish before exiting, and preserve the test runner's exit code.
+- Buffer streamed JSON test events across chunks, including split UTF-8 characters and a final line without a newline.
+
 ## 1.3.0
 
  - **FEAT**(deps): upgrade to recent sdk versions.
