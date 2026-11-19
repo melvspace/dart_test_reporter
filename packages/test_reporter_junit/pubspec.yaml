@@ -1,4 +1,4 @@
-name: junit_report
+name: test_reporter_junit
 resolution: workspace
 description: JUnit XML report adapter for test_reporter.
 version: 0.1.0
