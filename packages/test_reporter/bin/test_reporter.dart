@@ -35,26 +35,33 @@ Future<void> main(List<String> args) async {
       events = dartTest(arguments: testArgs);
   }
 
-  final (_, reporterPort) = await createReporter(reporter, args);
-
-  events.listen(
-    (event) async {
-      reporterPort.send(jsonEncode(event.toJson()));
-      if (event is TestExitEvent) {
-        // TODO(@melvspace): 06/13/24 exit when isolate done its work
-        await Future.delayed(Duration(seconds: 2));
-        exit(event.exitCode);
-      }
-    },
-    onError: (err) {
-      AnsiPen pen = AnsiPen()..red(bold: false);
-      print(pen(err));
-    },
+  final (isolate, reporterPort, reporterDone) = await createReporter(
+    reporter,
+    args,
   );
+
+  await for (final event in events.handleError(_printRunnerError)) {
+    reporterPort.send(jsonEncode(event.toJson()));
+
+    if (event is TestExitEvent) {
+      final reported = await reporterDone;
+      exitCode = event.exitCode == 0 && !reported ? 1 : event.exitCode;
+
+      return;
+    }
+  }
+
+  isolate.kill();
+  await reporterDone;
+  exitCode = 1;
 }
 
-// TODO(@melvspace): 06/12/24 handle errors
-Future<(Isolate, SendPort)> createReporter(
+void _printRunnerError(Object error) {
+  final pen = AnsiPen()..red(bold: false);
+  print(pen(error));
+}
+
+Future<(Isolate, SendPort, Future<bool>)> createReporter(
   String? reporter,
   List<String> args,
 ) async {
@@ -74,7 +81,6 @@ Future<(Isolate, SendPort)> createReporter(
       : "";
 
   final code = '''
-import 'dart:io';
 import 'dart:isolate';
 import 'dart:async';
 import 'dart:convert';
@@ -86,29 +92,27 @@ $customImportLine
 Future<void> main(List<String> args, SendPort sendPort) async {
   await runZoned(
     () async {
+      final reporter = ${customImportLine.isNotEmpty ? 'e1.$method(${hasArgs ? 'args' : ''})' : 'createReporter(args)'};
       final port = ReceivePort();
       sendPort.send(port.sendPort);
 
-      final reporter = ${customImportLine.isNotEmpty ? 'e1.$method(${hasArgs ? 'args' : ''})' : ' createReporter(args)'};
-      late final StreamSubscription subscription;
-      subscription = port.listen((e) async {
-        final event = TestEvent.fromJson(jsonDecode(e));
-        reporter.onEvent(event);
+      try {
+        await for (final message in port) {
+          final event = TestEvent.fromJson(jsonDecode(message));
+          await reporter.onEvent(event);
 
-        if (event is TestExitEvent) {
-          subscription.cancel();
-          port.close();
-
-          // TODO(@melvspace): 06/13/24 detect io running operations to exit safely
-          await Future.delayed(Duration(seconds: 1));
-          exit(0);
+          if (event is TestExitEvent) break;
         }
-      });
+      } finally {
+        port.close();
+      }
     },
     zoneSpecification: ZoneSpecification(
       print: (self, parent, zone, line) => sendPort.send(line),
     ),
   );
+
+  Isolate.exit();
 }
 ''';
 
@@ -121,27 +125,46 @@ Future<void> main(List<String> args, SendPort sendPort) async {
   final File tempFile = File(absoluteFilePath);
   await tempFile.writeAsString(code);
 
-  final ReceivePort receivePort = ReceivePort();
-  Completer<SendPort> sendPortCompleter = Completer();
-  final isolate = Isolate.spawnUri(
-    Uri.file(tempFile.path),
-    args,
-    receivePort.sendPort,
-  );
+  final receivePort = ReceivePort();
+  final ready = Completer<SendPort>();
+  final done = Completer<bool>();
+  var success = true;
 
-  receivePort.listen(
-    (message) {
-      if (message is SendPort && !sendPortCompleter.isCompleted) {
-        sendPortCompleter.complete(message);
+  try {
+    final isolate = await Isolate.spawnUri(
+      Uri.file(tempFile.path),
+      args,
+      receivePort.sendPort,
+      onError: receivePort.sendPort,
+      onExit: receivePort.sendPort,
+    );
+
+    receivePort.listen((message) {
+      switch (message) {
+        case SendPort port:
+          ready.complete(port);
+        case List error:
+          success = false;
+          stderr.writeln(error.join('\n'));
+        case null:
+          receivePort.close();
+          done.complete(success);
+
+          if (!ready.isCompleted) {
+            ready.completeError(StateError('Reporter exited before starting'));
+          }
+        default:
+          print(message.toString());
       }
+    });
 
-      if (message is! SendPort) {
-        print(message.toString());
-      }
-    },
-  );
-
-  return (await isolate, await sendPortCompleter.future);
+    return (isolate, await ready.future, done.future);
+  } catch (_) {
+    receivePort.close();
+    rethrow;
+  } finally {
+    await tempDir.delete(recursive: true);
+  }
 }
 
 Future<(String, String, bool)?> getCustomReporterImport({

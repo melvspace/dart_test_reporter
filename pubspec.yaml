@@ -5,6 +5,7 @@ workspace:
   - apps/sandbox
   - packages/alchemist_test_reporter
   - packages/allure_report
+  - packages/junit_report
   - packages/allure_server_cli
   - packages/test_reporter
 
