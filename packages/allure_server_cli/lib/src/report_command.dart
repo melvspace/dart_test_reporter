@@ -101,11 +101,16 @@ class ReportCommand {
     for (final file in upload) {
       try {
         final result = await UploadCommand(file: file).execute(client);
-        if (result == null) continue;
+
+        if (result == null) {
+          return null;
+        }
 
         results.add(result.uuid);
       } catch (e, s) {
         l.e("Failed to upload file: $file", error: e, stackTrace: s);
+
+        return null;
       }
     }
 
@@ -133,6 +138,7 @@ class ReportCommand {
 
       final result = ReportResult.fromJson(response.data);
       print("Report available at: ${result.url}");
+
       return result;
     } on DioException catch (e, s) {
       if (e.response case Response response) {
